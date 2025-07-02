@@ -8,6 +8,7 @@ import {
 } from '../../message/service/message.service';
 import { SqsConsumerService } from './sqs/sqs.consumer.service';
 import { SqsProducerService } from './sqs/sqs.producer.service';
+import { ChatMessageDto, ChatUserDto } from '../model/chat.user';
 
 @Injectable()
 export class ChatService implements OnModuleInit {
@@ -16,14 +17,14 @@ export class ChatService implements OnModuleInit {
     this._server = server;
   }
 
-  private users: Record<string, { username: string; room: string }> = {};
+  private users: Record<string, ChatUserDto> = {};
 
   constructor(
     @Inject(MESSAGE_SERVICE_PROVIDER)
     private readonly messageService: MessageService,
     private readonly sqsConsumerService: SqsConsumerService,
     private readonly sqsProducerService: SqsProducerService,
-  ) { }
+  ) {}
 
   async onModuleInit() {
     this.sqsConsumerService.handleEvents(
@@ -36,7 +37,10 @@ export class ChatService implements OnModuleInit {
     await this.messageService.saveMessage(message);
   }
 
-  async publishRawMessage(client: Socket, data: { message: string }): Promise<void> {
+  async publishRawMessage(
+    client: Socket,
+    chatMessage: ChatMessageDto,
+  ): Promise<void> {
     const user = this.users[client.id];
     if (!user) {
       return;
@@ -44,15 +48,16 @@ export class ChatService implements OnModuleInit {
     await this.sqsProducerService.sendMessage(ENV.aws_raw_sqs_url, {
       userId: user.username,
       room: user.room,
-      content: data.message,
+      content: chatMessage.content,
     });
   }
 
+  // TODO: process properly message
   async broadcastMessage(message: any) {
     await this.processCleanMessage(message);
     this._server.to(message.user.room).emit('messageFromRoom', {
       username: message.user.username,
-      message: message.data.message,
+      content: message.data.content,
     });
   }
 
@@ -63,8 +68,8 @@ export class ChatService implements OnModuleInit {
     }
   }
 
-  joinRoom(client: Socket, data: { username: string; room: string }) {
-    const { username, room } = data;
+  joinRoom(client: Socket, chatUser: ChatUserDto) {
+    const { username, room } = chatUser;
     client.join(room);
     this.users[client.id] = { username, room };
     client.to(room).emit('userJoined', {

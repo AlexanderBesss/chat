@@ -6,7 +6,7 @@ import {
 import { PaginationDto, PaginationSchema } from '../model/pagination.dto';
 import { Message } from '../model/message.entity';
 import { ResponseList } from '../model/message.response';
-import { ZodValidationPipe } from '../pipe/zod.validation.pipe';
+import { ZodValidationPipe } from '../../common/pipe/zod.validation.pipe';
 import { ParamnDto, ParamSchema } from '../model/param.dto';
 
 @Controller('messages')
@@ -14,7 +14,7 @@ export class MessageController {
   constructor(
     @Inject(MESSAGE_SERVICE_PROVIDER)
     private readonly messageService: ChatMessageService,
-  ) { }
+  ) {}
 
   @Get(':room')
   getRoomMessages(

@@ -98,19 +98,19 @@
     });
 
     socket.on('messageFromRoom', (data) => {
-      appendChatMessage(data.username, data.message);
+      appendChatMessage(data.username, data.content);
     });
 
     sendBtn.addEventListener('click', () => {
       const message = messageInput.value.trim();
       if (!message) return;
-      socket.emit('messageToRoom', { message });
+      socket.emit('messageToRoom', { content });
       messageInput.value = '';
     });
 
-    function appendChatMessage(sender, message) {
+    function appendChatMessage(sender, content) {
       const p = document.createElement('p');
-      p.innerHTML = `<strong>${sender}:</strong> ${message}`;
+      p.innerHTML = `<strong>${sender}:</strong> ${content}`;
       p.className = 'user';
       chatDiv.appendChild(p);
       chatDiv.scrollTop = chatDiv.scrollHeight;

@@ -13,6 +13,7 @@ export class ZodValidationPipe implements PipeTransform {
         path: err.path.join('.'),
         message: err.message,
       }));
+      console.error(errors);
 
       throw new BadRequestException({
         message: 'Validation failed',

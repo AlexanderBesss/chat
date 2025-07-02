@@ -5,10 +5,17 @@ import {
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
-  WebSocketServer
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from '../service/chat.service';
+import { ZodValidationPipe } from '../../common/pipe/zod.validation.pipe';
+import {
+  ChatMessageDto,
+  ChatMessageSchema,
+  ChatUserDto,
+  ChatUserSchema,
+} from '../model/chat.user';
 
 @WebSocketGateway({
   cors: {
@@ -24,9 +31,7 @@ export class ChatGateway implements OnGatewayDisconnect, OnGatewayInit {
     this.chatService.server = this.server;
   }
 
-  constructor(
-    private readonly chatService: ChatService,
-  ) { }
+  constructor(private readonly chatService: ChatService) {}
 
   handleDisconnect(client: Socket) {
     this.chatService.removeUser(client.id);
@@ -35,16 +40,17 @@ export class ChatGateway implements OnGatewayDisconnect, OnGatewayInit {
   @SubscribeMessage('joinRoom')
   handleJoinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { username: string; room: string },
+    @MessageBody(new ZodValidationPipe(ChatUserSchema)) chatUser: ChatUserDto,
   ) {
-    this.chatService.joinRoom(client, data);
+    this.chatService.joinRoom(client, chatUser);
   }
 
   @SubscribeMessage('messageToRoom')
   async handleRoomMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { message: string },
+    @MessageBody(new ZodValidationPipe(ChatMessageSchema))
+    chatMessage: ChatMessageDto,
   ) {
-    return await this.chatService.publishRawMessage(client, data);
+    return await this.chatService.publishRawMessage(client, chatMessage);
   }
 }
