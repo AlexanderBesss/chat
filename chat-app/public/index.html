@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NestJS Chat Room</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    #chat {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 300px;
+      overflow-y: scroll;
+      margin-bottom: 10px;
+    }
+
+    #chat p {
+      margin: 5px 0;
+    }
+
+    .system {
+      color: gray;
+      font-style: italic;
+    }
+
+    .user {
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <h2>Chat Room</h2>
+
+  <div>
+    <label>Username: <input type="text" id="username" /></label><br />
+    <label>Room: <input type="text" id="room" /></label><br />
+    <button id="joinBtn">Join Room</button>
+  </div>
+
+  <div id="chat" hidden></div>
+
+  <div id="messageForm" hidden>
+    <input type="text" id="messageInput" placeholder="Type a message..." />
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script>
+    const ip_address = '192.168.1.17:3000'
+    const socket = io(`ws://${ip_address}`, {
+      transports: ['websocket'],
+    });
+
+    const joinBtn = document.getElementById('joinBtn');
+    const usernameInput = document.getElementById('username');
+    const roomInput = document.getElementById('room');
+    const chatDiv = document.getElementById('chat');
+    const messageForm = document.getElementById('messageForm');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    joinBtn.addEventListener('click', () => {
+    const username = usernameInput.value.trim();
+    const room = roomInput.value.trim();
+      if (!username || !room) {
+        alert('Username and room are required');
+        return;
+      }
+
+      if (socket.connected) {
+        socket.emit('joinRoom', { username, room });
+      } else {
+        socket.on('connect', () => {
+          socket.emit('joinRoom', { username, room });
+        });
+      }
+    });
+
+    socket.on('joinedRoom', async (data) => {
+      chatDiv.hidden = false;
+      chatDiv.innerHTML = ''
+      messageForm.hidden = false;
+      const response = await fetch(`http://${ip_address}/messages/${data.room}`);
+      const messages = await response.json();
+       messages.data.forEach(message => {
+        console.log(message)
+        appendChatMessage(message.userId, message.content);
+      });
+      appendSystemMessage(data.message);
+    });
+
+    socket.on('userJoined', (data) => {
+      appendSystemMessage(data.message);
+    });
+
+    socket.on('messageFromRoom', (data) => {
+      appendChatMessage(data.username, data.message);
+    });
+
+    sendBtn.addEventListener('click', () => {
+      const message = messageInput.value.trim();
+      if (!message) return;
+      socket.emit('messageToRoom', { message });
+      messageInput.value = '';
+    });
+
+    function appendChatMessage(sender, message) {
+      const p = document.createElement('p');
+      p.innerHTML = `<strong>${sender}:</strong> ${message}`;
+      p.className = 'user';
+      chatDiv.appendChild(p);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+
+    function appendSystemMessage(message) {
+      const p = document.createElement('p');
+      p.textContent = message;
+      p.className = 'system';
+      chatDiv.appendChild(p);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+  </script>
+</body>
+</html>
