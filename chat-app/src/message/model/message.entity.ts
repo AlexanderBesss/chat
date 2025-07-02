@@ -18,7 +18,7 @@ export class Message {
   @Column()
   room: string;
 
-  @Column()
+  @Column({ type: 'text' })
   content: string;
 
   @CreateDateColumn({

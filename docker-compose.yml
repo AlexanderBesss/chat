@@ -1,0 +1,25 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+    ports:
+      - "3306:3306"
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    restart: unless-stopped
+    ports:
+      - "4566:4566"
+    environment:
+      - SQS_PROVIDER=elasticmq
+      - SERVICES=sqs,lambda,cloudformation,logs,iam,cloudwatch
+      - DEBUG=0
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"

@@ -2,6 +2,7 @@ import * as zod from 'zod';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
+
 const EnvSchema = zod.object({
   db_host: zod.string().nonempty(),
   db_port: zod.number(),
@@ -15,6 +16,7 @@ const EnvSchema = zod.object({
   aws_secret_key: zod.string().nonempty(),
   aws_raw_sqs_url: zod.string().url(),
   aws_clean_sqs_url: zod.string().url(),
+  sqs_endpoint: zod.string().nonempty(),
 });
 
 type EnvPayload = zod.infer<typeof EnvSchema>;
@@ -32,6 +34,7 @@ export const ENV: EnvPayload = {
   aws_secret_key: process.env.aws_secret_key!,
   aws_raw_sqs_url: process.env.aws_raw_sqs_url!,
   aws_clean_sqs_url: process.env.aws_clean_sqs_url!,
+  sqs_endpoint: process.env.sqs_endpoint!
 };
 
 export function validateEnv(): void {

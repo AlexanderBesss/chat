@@ -1,0 +1,82 @@
+service: Chat-Message-Processor
+
+provider:
+  stage: prod
+  name: aws
+  runtime: nodejs22.x
+  region: eu-central-1
+  memorySize: 128
+  timeout: 30
+  tracing:
+    lambda: true 
+  deploymentBucket:
+    name: chat-message-processor
+    maxPreviousDeploymentArtifacts: 1
+  logs:
+    frameworkLambda: false
+  versionFunctions: false
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+          Resource: "*"
+
+functions:
+  processChatMessage:
+    handler: src/main.handler
+    environment:
+      CLEAN_CHAT_MESSAGE_QUEUE_URL:
+        Ref: CleanChatMessageQueue
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - RawChatMessageQueue
+              - Arn
+
+resources:
+  Resources:
+    RawChatMessageQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: RawChatMessageQ
+    CleanChatMessageQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: CleanChatMessageQ
+
+  Outputs:
+    CleanChatMessageQueueUrl:
+      Description: URL of the CleanChatMessageQ
+      Value:
+        Ref: CleanChatMessageQueue
+      Export:
+        Name: CleanChatMessageQueueUrl
+
+plugins:
+  - serverless-offline
+  - serverless-localstack
+
+package:
+  individually: true
+
+useDotenv: true
+
+build:
+  esbuild:
+    bundle: true
+    minify: true
+    sourcemap: false
+    target: node22
+    platform: node
+    exclude:
+      - aws-sdk
+
+custom:
+  localstack:
+    stages:
+      - local

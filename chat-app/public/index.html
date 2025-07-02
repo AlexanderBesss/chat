@@ -87,8 +87,7 @@
       const response = await fetch(`http://${ip_address}/messages/${data.room}`);
       const messages = await response.json();
        messages.data.forEach(message => {
-        console.log(message)
-        appendChatMessage(message.userId, message.content);
+        appendChatMessage(message.userId, message.content, message?.createdAt);
       });
       appendSystemMessage(data.message);
     });
@@ -104,13 +103,13 @@
     sendBtn.addEventListener('click', () => {
       const message = messageInput.value.trim();
       if (!message) return;
-      socket.emit('messageToRoom', { content });
+      socket.emit('messageToRoom', {content: message });
       messageInput.value = '';
     });
 
-    function appendChatMessage(sender, content) {
+    function appendChatMessage(sender, content, createdAt) {
       const p = document.createElement('p');
-      p.innerHTML = `<strong>${sender}:</strong> ${content}`;
+      p.innerHTML = `${createdAt || ''} <strong>${sender}:</strong> ${content}`;
       p.className = 'user';
       chatDiv.appendChild(p);
       chatDiv.scrollTop = chatDiv.scrollHeight;

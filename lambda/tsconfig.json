@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es2022",
+        "module": "CommonJS",
+        "lib": [
+            "ES2022",
+            "DOM",
+            "ESNext"
+        ],
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
+    }
+}

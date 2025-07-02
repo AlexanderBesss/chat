@@ -9,7 +9,7 @@ import { SqsClientService } from './sqs.client.service';
 
 @Injectable()
 export class SqsConsumerService {
-  constructor(private readonly sqsClientService: SqsClientService) {}
+  constructor(private readonly sqsClientService: SqsClientService) { }
 
   async handleEvents(
     queueUrl: string,
@@ -40,7 +40,6 @@ export class SqsConsumerService {
         }
         await setTimeout(100);
       } catch (error) {
-        // TODO: handle error, push into deadletterqueue (Optionally)
         console.error('Polling error', error);
       }
     }

@@ -24,7 +24,7 @@ export class ChatService implements OnModuleInit {
     private readonly messageService: MessageService,
     private readonly sqsConsumerService: SqsConsumerService,
     private readonly sqsProducerService: SqsProducerService,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     this.sqsConsumerService.handleEvents(
@@ -52,12 +52,11 @@ export class ChatService implements OnModuleInit {
     });
   }
 
-  // TODO: process properly message
-  async broadcastMessage(message: any) {
+  async broadcastMessage(message: Message) {
     await this.processCleanMessage(message);
-    this._server.to(message.user.room).emit('messageFromRoom', {
-      username: message.user.username,
-      content: message.data.content,
+    this._server.to(message.room).emit('messageFromRoom', {
+      username: message.userId,
+      content: message.content,
     });
   }
 
