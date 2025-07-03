@@ -15,6 +15,8 @@ To start the application locally, you need to follow two steps:
 
 I assume you have already configured AWS-CLI on your local machine (`aws configure`) and your AWS user has all required IAM roles (S3, Lambda, SQS, CloudFormation, etc).
 
+Before deploying, you need to create an S3 bucket for the Lambda code. You can find the correct bucket name in the serverless.yml file under the `deploymentBucket` property.
+
 To deploy the lambda, run: `make deploy-lambda-prod`
 
 ### Endpoints
@@ -22,5 +24,5 @@ To deploy the lambda, run: `make deploy-lambda-prod`
 By default, frontend chat should be avalidable at: http://localhost:3000, 
 
 and 2 http endpoints: 
-- http://localhost:3000/messages?skip=0&limit=10
-- http://localhost:3000/messages/room?skip=0&limit=10
+- all messgas: http://localhost:3000/messages?skip=0&limit=10
+- all messages in a room: http://localhost:3000/messages/room?skip=0&limit=10
