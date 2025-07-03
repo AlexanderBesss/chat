@@ -9,7 +9,7 @@ import { SqsClientService } from './sqs.client.service';
 
 @Injectable()
 export class SqsConsumerService {
-  constructor(private readonly sqsClientService: SqsClientService) { }
+  constructor(private readonly sqsClientService: SqsClientService) {}
 
   async handleEvents(
     queueUrl: string,
@@ -20,7 +20,7 @@ export class SqsConsumerService {
         const command = new ReceiveMessageCommand({
           QueueUrl: queueUrl,
           MaxNumberOfMessages: 1,
-          WaitTimeSeconds: 1,
+          WaitTimeSeconds: 5,
         });
         const response = await this.sqsClientService.client.send(command);
         const messages = response.Messages || [];

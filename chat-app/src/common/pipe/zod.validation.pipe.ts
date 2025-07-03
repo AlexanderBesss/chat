@@ -15,10 +15,12 @@ export class ZodValidationPipe implements PipeTransform {
       }));
       console.error(errors);
 
-      throw new BadRequestException({
+      const errorPayload = {
         message: 'Validation failed',
         errors,
-      });
+      };
+
+      throw new BadRequestException(errorPayload);
     }
 
     return result.data;

@@ -5,7 +5,7 @@ TIMEOUT=60
 LAMBDA_DIR=lambda
 CHAT_APP_DIR=chat-app
 
-.PHONY: up down wait create-bucket deploy-lambda logs
+.PHONY: up down wait create-bucket deploy-lambda-local logs start-local list start-nest-app
 
 up:
 	docker compose up -d
@@ -29,10 +29,10 @@ wait:
 create-bucket:
 	aws --endpoint-url=http://$(LOCALSTACK_HOST):$(LOCALSTACK_PORT) s3 mb s3://$(BUCKET_NAME) || true
 
-deploy-lambda:
+deploy-lambda-local:
 	cd $(LAMBDA_DIR) && npx serverless deploy --stage local
 
-start-nest_app: 
+start-nest-app: 
 	cd $(CHAT_APP_DIR) && npm start
 
 logs:
@@ -41,9 +41,11 @@ logs:
 list:
 	cd $(LAMBDA_DIR) && npx serverless info --stage local
 
-
-start-local: up wait create-bucket deploy-lambda start-nest_app
+start-local: up wait create-bucket deploy-lambda-local start-nest-app
 
 install:
-	(cd $(LAMBDA_DIR) && npm i)
-	(cd $(CHAT_APP_DIR) && npm i)
+	(cd $(LAMBDA_DIR) && npm ci)
+	(cd $(CHAT_APP_DIR) && npm ci)
+
+deploy-lambda-prod:
+	cd $(LAMBDA_DIR) && npx serverless deploy --stage prod

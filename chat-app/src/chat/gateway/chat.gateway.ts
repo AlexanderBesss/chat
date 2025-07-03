@@ -8,14 +8,14 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChatService } from '../service/chat.service';
 import { ZodValidationPipe } from '../../common/pipe/zod.validation.pipe';
 import {
   ChatMessageDto,
   ChatMessageSchema,
   ChatUserDto,
   ChatUserSchema,
-} from '../model/chat.user';
+} from '../model/chat.model';
+import { ChatService } from '../service/chat.service';
 
 @WebSocketGateway({
   cors: {
@@ -31,7 +31,7 @@ export class ChatGateway implements OnGatewayDisconnect, OnGatewayInit {
     this.chatService.server = this.server;
   }
 
-  constructor(private readonly chatService: ChatService) {}
+  constructor(private readonly chatService: ChatService) { }
 
   handleDisconnect(client: Socket) {
     this.chatService.removeUser(client.id);

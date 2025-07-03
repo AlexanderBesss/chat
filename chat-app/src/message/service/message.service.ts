@@ -16,7 +16,7 @@ export class ChatMessageService implements MessageService {
   constructor(
     @InjectRepository(Message)
     private readonly userRepository: Repository<Message>,
-  ) {}
+  ) { }
 
   async saveMessage(message: Message): Promise<Message> {
     const newMessage = this.userRepository.create(message);
@@ -27,28 +27,24 @@ export class ChatMessageService implements MessageService {
     room: string,
     pagination: PaginationDto,
   ): Promise<ResponseList<Message>> {
-    const messages = await this.userRepository.find({
-      order: { createdAt: 'ASC' },
-      skip: pagination.skip,
-      take: pagination.limit,
+    const filter = {
       where: {
         room,
       },
-    });
-    return {
-      data: messages,
-      pagination,
-    };
+    }
+    return await this.findAll(pagination, filter);
   }
 
-  async findAll(pagination: PaginationDto): Promise<ResponseList<Message>> {
-    const messages = await this.userRepository.find({
+  async findAll(pagination: PaginationDto, filters?: any): Promise<ResponseList<Message>> {
+    const [messages, totalCount] = await this.userRepository.findAndCount({
+      ...filters,
       order: { createdAt: 'ASC' },
       skip: pagination.skip,
       take: pagination.limit,
     });
     return {
       data: messages,
+      totalCount,
       pagination,
     };
   }

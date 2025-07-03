@@ -40,22 +40,35 @@ functions:
 
 resources:
   Resources:
+    RawChatMessageDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: RawChatMessageDLQ
     RawChatMessageQueue:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: RawChatMessageQ
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt:
+              - RawChatMessageDLQ
+              - Arn
+          maxReceiveCount: 5
+    
+    CleanChatMessageDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: CleanChatMessageDLQ
     CleanChatMessageQueue:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: CleanChatMessageQ
-
-  Outputs:
-    CleanChatMessageQueueUrl:
-      Description: URL of the CleanChatMessageQ
-      Value:
-        Ref: CleanChatMessageQueue
-      Export:
-        Name: CleanChatMessageQueueUrl
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt:
+              - CleanChatMessageDLQ
+              - Arn
+          maxReceiveCount: 5 
 
 plugins:
   - serverless-offline

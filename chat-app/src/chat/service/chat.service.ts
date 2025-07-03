@@ -8,7 +8,7 @@ import {
 } from '../../message/service/message.service';
 import { SqsConsumerService } from './sqs/sqs.consumer.service';
 import { SqsProducerService } from './sqs/sqs.producer.service';
-import { ChatMessageDto, ChatUserDto } from '../model/chat.user';
+import { ChatMessageDto, ChatUserDto } from '../model/chat.model';
 
 @Injectable()
 export class ChatService implements OnModuleInit {

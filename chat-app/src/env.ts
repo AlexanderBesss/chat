@@ -34,7 +34,7 @@ export const ENV: EnvPayload = {
   aws_secret_key: process.env.aws_secret_key!,
   aws_raw_sqs_url: process.env.aws_raw_sqs_url!,
   aws_clean_sqs_url: process.env.aws_clean_sqs_url!,
-  sqs_endpoint: process.env.sqs_endpoint!
+  sqs_endpoint: process.env.sqs_endpoint!,
 };
 
 export function validateEnv(): void {
