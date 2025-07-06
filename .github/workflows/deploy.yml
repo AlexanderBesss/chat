@@ -10,6 +10,7 @@ env:
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+  ECS_TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION }}
 
 jobs:
   deploy:
@@ -45,4 +46,4 @@ jobs:
       with:
         service: ${{ env.ECS_SERVICE }}
         cluster: ${{ env.ECS_CLUSTER }}
-        task-definition: "arn:aws:ecs:eu-central-1:294342628786:task-definition/chat-app-family:1"
+        task-definition: ${{ env.ECS_TASK_DEFINITION }}
