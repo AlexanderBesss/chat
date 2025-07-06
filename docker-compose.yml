@@ -10,6 +10,12 @@ services:
       MYSQL_PASSWORD: test_password
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
   localstack:
     image: localstack/localstack:latest
     container_name: localstack
@@ -23,3 +29,22 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  chat-app:
+    image: chat-app:latest
+    container_name: chat-app
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    depends_on:
+      mysql:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    environment:
+      db_host: mysql
+      sqs_endpoint: http://localstack:4566

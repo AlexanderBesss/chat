@@ -8,6 +8,7 @@ CHAT_APP_DIR=chat-app
 .PHONY: up down wait create-bucket deploy-lambda-local logs start-local list start-nest-app
 
 up:
+	(cd $(CHAT_APP_DIR) && npm run build && npm run docker:build)
 	docker compose up -d
 
 down:
@@ -42,6 +43,8 @@ list:
 	cd $(LAMBDA_DIR) && npx serverless info --stage local
 
 start-local: up wait create-bucket deploy-lambda-local start-nest-app
+
+start-docker: up wait create-bucket deploy-lambda-local
 
 install:
 	(cd $(LAMBDA_DIR) && npm ci)

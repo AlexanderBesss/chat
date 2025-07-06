@@ -4,4 +4,4 @@ export const ParamSchema = zod.object({
   room: zod.string().nonempty(),
 });
 
-export type ParamnDto = zod.infer<typeof ParamSchema>;
+export type ParamDto = zod.infer<typeof ParamSchema>;
