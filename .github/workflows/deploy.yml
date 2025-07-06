@@ -76,4 +76,4 @@ jobs:
       with:
         service: ${{ env.ECS_SERVICE }}
         cluster: ${{ env.ECS_CLUSTER }}
-        task-definition: ${{ env.ECS_TASK_DEFINITION }}
+        task-definition: arn:aws:ecs:eu-central-1:294342628786:task-definition/chat-app-family:1
