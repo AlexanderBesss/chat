@@ -71,6 +71,10 @@ jobs:
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+    - name: Debug task definition value
+      run: |
+        echo "Using ECS Task Definition: ${{ env.ECS_TASK_DEFINITION }}"   
+
     - name: Update task definition with new image
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
