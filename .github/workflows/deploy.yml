@@ -33,6 +33,7 @@ jobs:
     - name: Build, tag, and push Docker image to ECR
       run: |
         cd chat-app
+        npm i
         npm run build
         IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
         docker build -t $IMAGE_URI .
