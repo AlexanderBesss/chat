@@ -5,9 +5,11 @@ import { join } from 'node:path';
 import { ChatModule } from './chat/chat.module';
 import { ENV } from './env';
 import { MessageModule } from './message/message.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
+    HealthModule,
     MessageModule,
     ChatModule,
     TypeOrmModule.forRoot({
