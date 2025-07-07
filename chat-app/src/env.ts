@@ -14,9 +14,9 @@ const EnvSchema = zod.object({
   AWS_REGION: zod.string().nonempty(),
   AWS_ACCESS_KEY_ID: zod.string().nonempty(),
   AWS_SECRET_ACCESS_KEY: zod.string().nonempty(),
-  aws_raw_sqs_url: zod.string().url(),
-  aws_clean_sqs_url: zod.string().url(),
-  sqs_endpoint: zod.string().nonempty(),
+  AWS_RAW_SQS_URL: zod.string().url(),
+  AWS_CLEAN_SQS_URL: zod.string().url(),
+  SQS_ENDPOINT: zod.string().nonempty(),
 });
 
 type EnvPayload = zod.infer<typeof EnvSchema>;
@@ -32,9 +32,9 @@ export const ENV: EnvPayload = {
   AWS_REGION: process.env.AWS_REGION!,
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID!,
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY!,
-  aws_raw_sqs_url: process.env.aws_raw_sqs_url!,
-  aws_clean_sqs_url: process.env.aws_clean_sqs_url!,
-  sqs_endpoint: process.env.sqs_endpoint!,
+  AWS_RAW_SQS_URL: process.env.AWS_RAW_SQS_URL!,
+  AWS_CLEAN_SQS_URL: process.env.AWS_CLEAN_SQS_URL!,
+  SQS_ENDPOINT: process.env.SQS_ENDPOINT!,
 };
 
 export function validateEnv(): void {

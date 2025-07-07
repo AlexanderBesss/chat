@@ -9,7 +9,7 @@ export class SqsClientService implements OnModuleDestroy {
   constructor() {
     this.sqsClient = new SQSClient({
       region: ENV.AWS_REGION,
-      endpoint: ENV.sqs_endpoint,
+      endpoint: ENV.SQS_ENDPOINT,
       credentials: {
         accessKeyId: ENV.AWS_ACCESS_KEY_ID,
         secretAccessKey: ENV.AWS_SECRET_ACCESS_KEY,

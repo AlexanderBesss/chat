@@ -196,7 +196,7 @@ module "db" {
 
   instance_class         = "db.t3.micro"
   allocated_storage      = 20
-  storage_encrypted      = true
+  storage_encrypted      = false
   skip_final_snapshot    = true
   deletion_protection    = false
 
@@ -212,7 +212,7 @@ module "db" {
 
   vpc_security_group_ids = [aws_security_group.mysql.id]
 
-  publicly_accessible = false
+  publicly_accessible = true
   multi_az            = false
 
   tags = {
@@ -231,6 +231,7 @@ resource "aws_security_group" "mysql" {
     to_port         = 3306
     protocol        = "tcp"
     security_groups = [aws_security_group.ecs.id]
+    cidr_blocks = ["0.0.0.0/0"]
     description     = "ECS access"
   }
 

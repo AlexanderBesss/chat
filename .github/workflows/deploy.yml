@@ -10,6 +10,8 @@ env:
   ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
   ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
   ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+  AWS_RAW_SQS_URL: ${{ vars.AWS_RAW_SQS_URL }}
+  AWS_CLEAN_SQS_URL: ${{ vars.AWS_CLEAN_SQS_URL }}
   DB_HOST: ${{ secrets.DB_HOST }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_NAME: ${{ secrets.DB_NAME }}
@@ -23,6 +25,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Deploy Serverless
+      run: |
+        cd lambda
+        npm ci
+        npm run deploy
+  
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:

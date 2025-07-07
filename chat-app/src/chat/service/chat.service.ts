@@ -28,7 +28,7 @@ export class ChatService implements OnModuleInit {
 
   async onModuleInit() {
     this.sqsConsumerService.handleEvents(
-      ENV.aws_clean_sqs_url,
+      ENV.AWS_CLEAN_SQS_URL,
       async (message) => this.broadcastMessage(message),
     );
   }
@@ -45,7 +45,7 @@ export class ChatService implements OnModuleInit {
     if (!user) {
       return;
     }
-    await this.sqsProducerService.sendMessage(ENV.aws_raw_sqs_url, {
+    await this.sqsProducerService.sendMessage(ENV.AWS_RAW_SQS_URL, {
       userId: user.username,
       room: user.room,
       content: chatMessage.content,
