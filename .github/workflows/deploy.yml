@@ -30,9 +30,6 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
     - name: Generate Docker image tag based on app hash
       id: hash
       run: |
@@ -41,14 +38,6 @@ jobs:
         echo "APP_HASH=$APP_HASH" >> $GITHUB_ENV
         echo "IMAGE_TAG=$APP_HASH" >> $GITHUB_ENV
         echo "IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$APP_HASH" >> $GITHUB_ENV
-
-    - name: Cache Docker layers
-      uses: actions/cache@v4
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ env.IMAGE_TAG }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
 
     - name: Install dependencies and build app
       run: |
@@ -62,13 +51,6 @@ jobs:
         context: ./chat-app
         push: true
         tags: ${{ env.IMAGE_URI }}
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache-new
-
-    - name: Move new cache for next build
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
     - name: Force new ECS deployment
       run: |
