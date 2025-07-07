@@ -20,7 +20,7 @@ module "alb" {
   version = "~> 9.0"
 
   enable_deletion_protection = false
-  name               = "ecs-chat-alb-80"
+  name               = "chat-app-alb-3000"
   load_balancer_type = "application"
   internal           = false
   vpc_id             = data.aws_vpc.default.id
@@ -28,17 +28,17 @@ module "alb" {
 
   security_group_ingress_rules = {
     http = {
-      from_port   = 80
-      to_port     = 80
+      from_port   = 3000
+      to_port     = 3000
       ip_protocol = "tcp"
       cidr_ipv4   = "0.0.0.0/0"
     }
   }
 
   target_groups = {
-    ecs-chat = {
+    chat-app = {
       backend_protocol = "HTTP"
-      backend_port     = 80
+      backend_port     = 3000
       target_type      = "ip"
       create_attachment = false
       health_check = {
@@ -50,10 +50,10 @@ module "alb" {
 
   listeners = {
     http = {
-      port     = 80
+      port     = 3000
       protocol = "HTTP"
       forward = {
-        target_group_key = "ecs-chat"
+        target_group_key = "chat-app"
       }
     }
   }
@@ -63,65 +63,87 @@ module "alb" {
   }
 }
 
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecsTaskExecutionRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
 module "ecs" {
   source  = "terraform-aws-modules/ecs/aws"
   version = "~> 5.12.1"
 
-  cluster_name = "ecs-chat-app"
+  cluster_name = "chat-app"
 
   services = {
     chat-app = {
+      assign_public_ip = true
       cpu    = 256
       memory = 512
 
+      execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+
       container_definitions = {
-        ecs-chat = {
-          assign_public_ip = true
+        chat-app = {
           cpu              = 256
           memory           = 512
           essential        = true
-          image            = "nginx:latest"
+          image            = "294342628786.dkr.ecr.eu-central-1.amazonaws.com/test/chat-app:d5c33c060bde203639ace35af9a78a2200b7732a"
 
           port_mappings = [
             {
-              name          = "ecs-chat"
-              containerPort = 80
-              hostPort      = 80
+              name          = "chat-app"
+              containerPort = 3000
+              hostPort      = 3000
               protocol      = "tcp"
             }
           ]
         }
       }
-
+      
       service_connect_configuration = {
         enable_execute_command = true
         assign_public_ip       = true
         namespace              = aws_service_discovery_private_dns_namespace.this.name
         service = {
           client_alias = {
-            port     = 80
-            dns_name = "ecs-chat"
+            port     = 3000
+            dns_name = "chat-app"
           }
-          port_name      = "ecs-chat"
-          discovery_name = "ecs-chat"
+          port_name      = "chat-app"
+          discovery_name = "chat-app"
         }
       }
 
       load_balancer = {
         service = {
-          target_group_arn = module.alb.target_groups.ecs-chat.arn
-          container_name   = "ecs-chat"
-          container_port   = 80
+          target_group_arn = module.alb.target_groups.chat-app.arn
+          container_name   = "chat-app"
+          container_port   = 3000
         }
       }
 
       subnet_ids = data.aws_subnets.default.ids
 
       security_group_rules = {
-        alb_ingress_80 = {
+        alb_ingress_3000 = {
           type                     = "ingress"
-          from_port                = 80
-          to_port                  = 80
+          from_port                = 3000
+          to_port                  = 3000
           protocol                 = "tcp"
           description              = "Allow ALB to reach ECS service"
           source_security_group_id = module.alb.security_group_id
