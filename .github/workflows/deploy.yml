@@ -50,7 +50,9 @@ jobs:
       with:
         context: ./chat-app
         push: true
-        tags: ${{ env.IMAGE_URI }}
+        tags: |
+              ${{ env.IMAGE_URI }}
+              ${{ env.ECR_REPOSITORY }}:latest
 
     - name: Force new ECS deployment
       run: |
