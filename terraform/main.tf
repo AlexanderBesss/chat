@@ -119,7 +119,7 @@ module "ecs" {
           cpu              = 256
           memory           = 512
           essential        = true
-          image            = "294342628786.dkr.ecr.eu-central-1.amazonaws.com/test/chat-app:d5c33c060bde203639ace35af9a78a2200b7732a"
+          image            = "294342628786.dkr.ecr.eu-central-1.amazonaws.com/test/chat-app:latest"
 
           port_mappings = [
             {
@@ -175,36 +175,6 @@ module "ecs" {
         }
       }
 
-      environment = [
-        {
-          name  = "DB_HOST"
-          value = module.db.db_instance_endpoint
-        },
-        {
-          name  = "DB_PORT"
-          value = "3306"
-        },
-        {
-          name  = "DB_NAME"
-          value = var.DB_NAME
-        },
-        {
-          name  = "DB_USER"
-          value = var.DB_USERNAME
-        },
-        {
-          name  = "DB_PASSWORD"
-          value = var.DB_PASSWORD
-        }, 
-        {
-          name  = "aws_raw_sqs_url"
-          value = var.aws_raw_sqs_url
-        },
-        {
-          name  = "aws_clean_sqs_url"
-          value = var.aws_clean_sqs_url
-        }
-      ]
     }
   }
 
