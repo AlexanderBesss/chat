@@ -14,13 +14,6 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_RAW_SQS_URL: ${{ vars.AWS_RAW_SQS_URL }}
-  AWS_CLEAN_SQS_URL: ${{ vars.AWS_CLEAN_SQS_URL }}
-  DB_HOST: ${{ secrets.DB_HOST }}
-  DB_USERNAME: ${{ secrets.DB_USERNAME }}
-  DB_NAME: ${{ secrets.DB_NAME }}
-  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-  DB_PORT: ${{ vars.DB_PORT }}
 
 jobs:
   deploy:
@@ -43,6 +36,7 @@ jobs:
         DB_NAME=${{ secrets.DB_NAME }}
         DB_PASSWORD=${{ secrets.DB_PASSWORD }}
         DB_PORT=${{ vars.DB_PORT }}
+        APP_PORT=${{ vars.APP_PORT }}
         EOF
 
     - name: Deploy Serverless
