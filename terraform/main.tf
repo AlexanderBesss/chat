@@ -83,6 +83,23 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_security_group" "ecs" {
+  name        = "ecs-sg"
+  description = "Security group for ECS tasks"
+  vpc_id      = data.aws_vpc.default.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "ECS SG"
+  }
+}
+
 module "ecs" {
   source  = "terraform-aws-modules/ecs/aws"
   version = "~> 5.12.1"
@@ -157,11 +174,104 @@ module "ecs" {
           cidr_blocks = ["0.0.0.0/0"]
         }
       }
+
+      environment = [
+        {
+          name  = "DB_HOST"
+          value = module.db.db_instance_endpoint
+        },
+        {
+          name  = "DB_PORT"
+          value = "3306"
+        },
+        {
+          name  = "DB_NAME"
+          value = var.DB_NAME
+        },
+        {
+          name  = "DB_USER"
+          value = var.DB_USERNAME
+        },
+        {
+          name  = "DB_PASSWORD"
+          value = var.DB_PASSWORD
+        }, 
+        {
+          name  = "aws_raw_sqs_url"
+          value = var.aws_raw_sqs_url
+        },
+        {
+          name  = "aws_clean_sqs_url"
+          value = var.aws_clean_sqs_url
+        }
+      ]
     }
   }
 
   tags = {
     Environment = "Development"
     Project     = "Chat App"
+  }
+}
+
+module "db" {
+  source  = "terraform-aws-modules/rds/aws"
+  version = "~> 6.0"
+
+  identifier = "chat-app-mysql"
+  engine     = "mysql"
+  engine_version = "8.0"
+  family               = "mysql8.0"
+  major_engine_version = "8.0"
+
+  instance_class         = "db.t3.micro"
+  allocated_storage      = 20
+  storage_encrypted      = true
+  skip_final_snapshot    = true
+  deletion_protection    = false
+
+
+  db_name  =  var.DB_NAME
+  username = var.DB_USERNAME
+  port     = "3306"
+  password    = var.DB_PASSWORD
+
+
+  create_db_subnet_group = true
+  subnet_ids             = data.aws_subnets.default.ids
+
+  vpc_security_group_ids = [aws_security_group.mysql.id]
+
+  publicly_accessible = false
+  multi_az            = false
+
+  tags = {
+    Environment = "Development"
+    Project     = "Chat App"
+  }
+}
+
+resource "aws_security_group" "mysql" {
+  name        = "mysql-sg"
+  vpc_id      = data.aws_vpc.default.id
+  description = "Allow ECS service to connect to RDS MySQL"
+
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs.id]
+    description     = "ECS access"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "MySQL SG"
   }
 }

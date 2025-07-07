@@ -46,5 +46,5 @@ services:
       localstack:
         condition: service_healthy
     environment:
-      db_host: mysql
+      DB_HOST: mysql
       sqs_endpoint: http://localstack:4566
