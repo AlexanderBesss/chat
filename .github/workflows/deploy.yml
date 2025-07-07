@@ -16,6 +16,7 @@ env:
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_NAME: ${{ secrets.DB_NAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
 
 jobs:
   deploy:
