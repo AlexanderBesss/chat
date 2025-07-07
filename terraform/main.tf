@@ -200,7 +200,7 @@ module "db" {
   skip_final_snapshot    = true
   deletion_protection    = false
 
-
+  manage_master_user_password = false
   db_name  =  var.DB_NAME
   username = var.DB_USERNAME
   port     = "3306"
