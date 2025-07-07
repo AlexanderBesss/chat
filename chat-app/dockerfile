@@ -7,7 +7,7 @@ RUN npm ci --only=production
 
 COPY dist ./dist
 COPY public ./public
-COPY .env.prod ./.env
+COPY .env ./.env
 
 EXPOSE 3000
 
