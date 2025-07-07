@@ -42,7 +42,7 @@ module "alb" {
       target_type      = "ip"
       create_attachment = false
       health_check = {
-        path    = "/"
+        path    = "/health"
         matcher = "200-399"
       }
     }
