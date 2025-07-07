@@ -5,7 +5,7 @@ import { ENV, validateEnv } from './env';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
-  await app.listen(ENV.APP_PORT || 3000);
+  await app.listen(ENV.APP_PORT, '0.0.0.0');
 }
 validateEnv();
 bootstrap();
