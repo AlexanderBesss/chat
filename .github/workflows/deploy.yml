@@ -73,6 +73,8 @@ jobs:
           DB_USERNAME=${{ secrets.DB_USERNAME }}
           DB_NAME=${{ secrets.DB_NAME }}
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          AWS_RAW_SQS_URL=${{ vars.AWS_RAW_SQS_URL }}
+          AWS_CLEAN_SQS_URL=${{ vars.AWS_CLEAN_SQS_URL }}
 
     - name: Force new ECS deployment
       run: |
