@@ -23,16 +23,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install Lambda dependencies
-      run: |
-        cd lambda
-        npm ci
-    
-    - name: Install Chat-app dependencies
-      run: |
-        cd chat-app
-        npm i
-
     - name: Cache node modules (chat-app)
       uses: actions/cache@v4
       with:
@@ -48,6 +38,16 @@ jobs:
         key: ${{ runner.os }}-node-lambda-${{ hashFiles('lambda/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-lambda-
+
+    - name: Install Lambda dependencies
+      run: |
+        cd lambda
+        npm ci
+
+    - name: Install Chat-app dependencies
+      run: |
+        cd chat-app
+        npm i        
 
     - name: Create .env file
       run: |
