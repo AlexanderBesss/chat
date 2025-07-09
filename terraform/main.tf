@@ -60,6 +60,11 @@ resource "aws_security_group" "ecs" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "chat_app" {
+  name              = "/ecs/chat-app"
+  retention_in_days = 1
+}
+
 module "ecs" {
   source  = "terraform-aws-modules/ecs/aws"
   version = "~> 5.12.1"
@@ -104,6 +109,14 @@ module "ecs" {
         }
       }
 
+      log_configuration = {
+        log_driver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.chat_app.name
+          "awslogs-region"        = "eu-central-1"
+          "awslogs-stream-prefix" = "chat-app"
+        }
+      }
     }
   }
 
