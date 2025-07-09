@@ -23,6 +23,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Install Lambda dependencies
+      run: |
+        cd lambda
+        npm ci
+    
+    - name: Install Chat-app dependencies
+      run: |
+        cd chat-app
+        npm i
+
     - name: Cache node modules (chat-app)
       uses: actions/cache@v4
       with:
@@ -68,7 +78,6 @@ jobs:
       if: steps.lambda_changes.outputs.changed == 'true'
       run: |
         cd lambda
-        npm ci
         npm run deploy
 
     - name: Configure AWS credentials
@@ -91,10 +100,9 @@ jobs:
         echo "IMAGE_TAG=$APP_HASH" >> $GITHUB_ENV
         echo "IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$APP_HASH" >> $GITHUB_ENV
 
-    - name: Install dependencies and build app
+    - name: Build Chat-app
       run: |
         cd chat-app
-        npm i
         npm run build
 
     - name: Set up Docker Buildx
