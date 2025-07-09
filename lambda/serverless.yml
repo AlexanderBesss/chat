@@ -29,7 +29,6 @@ provider:
 functions:
   processChatMessage:
     handler: src/main.handler
-    logRetentionInDays: 1
     environment:
       CLEAN_CHAT_MESSAGE_QUEUE_URL:
         Ref: CleanChatMessageQueue
