@@ -23,6 +23,7 @@ provider:
             - sqs:ReceiveMessage
             - sqs:DeleteMessage
             - sqs:GetQueueAttributes
+            - sqs:SendMessage
           Resource: "*"
 
 functions:

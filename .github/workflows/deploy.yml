@@ -1,0 +1,90 @@
+name: Deploy to AWS Fargate
+
+on:
+  push:
+    branches:
+      - production
+
+env:
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+  ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+  SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create .env file
+      run: |
+        cat <<EOF > chat-app/.env
+        AWS_REGION=${{ secrets.AWS_REGION }}
+        AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_RAW_SQS_URL=${{ vars.AWS_RAW_SQS_URL }}
+        AWS_CLEAN_SQS_URL=${{ vars.AWS_CLEAN_SQS_URL }}
+        DB_HOST=${{ secrets.DB_HOST }}
+        DB_USERNAME=${{ secrets.DB_USERNAME }}
+        DB_NAME=${{ secrets.DB_NAME }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        DB_PORT=${{ vars.DB_PORT }}
+        APP_PORT=${{ vars.APP_PORT }}
+        EOF
+
+    - name: Deploy Serverless
+      run: |
+        cd lambda
+        npm ci
+        npm run deploy
+  
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Generate Docker image tag based on app hash
+      id: hash
+      run: |
+        cd chat-app
+        APP_HASH=$(find . -type f -exec sha1sum {} \; | sha1sum | cut -d' ' -f1)
+        echo "APP_HASH=$APP_HASH" >> $GITHUB_ENV
+        echo "IMAGE_TAG=$APP_HASH" >> $GITHUB_ENV
+        echo "IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$APP_HASH" >> $GITHUB_ENV
+
+    - name: Install dependencies and build app
+      run: |
+        cd chat-app
+        npm i
+        npm run build
+
+    - name: Build and push Docker image to ECR
+      uses: docker/build-push-action@v5
+      with:
+        context: ./chat-app
+        push: true
+        tags: |
+          ${{ env.IMAGE_URI }}
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
+    - name: Force new ECS deployment
+      run: |
+        aws ecs update-service \
+          --cluster ${{ env.ECS_CLUSTER }} \
+          --service ${{ env.ECS_SERVICE }} \
+          --force-new-deployment
+              

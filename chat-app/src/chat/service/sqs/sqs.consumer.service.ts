@@ -9,7 +9,7 @@ import { SqsClientService } from './sqs.client.service';
 
 @Injectable()
 export class SqsConsumerService {
-  constructor(private readonly sqsClientService: SqsClientService) {}
+  constructor(private readonly sqsClientService: SqsClientService) { }
 
   async handleEvents(
     queueUrl: string,
@@ -33,7 +33,7 @@ export class SqsConsumerService {
 
           await this.sqsClientService.client.send(
             new DeleteMessageCommand({
-              QueueUrl: ENV.aws_clean_sqs_url,
+              QueueUrl: ENV.AWS_CLEAN_SQS_URL,
               ReceiptHandle: message.ReceiptHandle,
             }),
           );

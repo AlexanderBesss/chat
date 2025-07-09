@@ -5,18 +5,20 @@ import { join } from 'node:path';
 import { ChatModule } from './chat/chat.module';
 import { ENV } from './env';
 import { MessageModule } from './message/message.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
+    HealthModule,
     MessageModule,
     ChatModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: ENV.db_host,
-      port: ENV.db_port,
-      username: ENV.db_username,
-      password: ENV.db_password,
-      database: ENV.database_name,
+      host: ENV.DB_HOST,
+      port: ENV.DB_PORT,
+      username: ENV.DB_USERNAME,
+      password: ENV.DB_PASSWORD,
+      database: ENV.DB_NAME,
       entities: [__dirname + '**/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
@@ -27,4 +29,4 @@ import { MessageModule } from './message/message.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
