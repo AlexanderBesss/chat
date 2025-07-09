@@ -74,17 +74,17 @@ module "ecs" {
   services = {
     chat-app = {
       assign_public_ip = true
-      cpu    = 256
-      memory = 512
+      cpu              = 256
+      memory           = 512
 
       execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
 
       container_definitions = {
         chat-app = {
-          cpu              = 256
-          memory           = 512
-          essential        = true
-          image            = "294342628786.dkr.ecr.eu-central-1.amazonaws.com/test/chat-app:latest"
+          cpu       = 256
+          memory    = 512
+          essential = true
+          image     = "294342628786.dkr.ecr.eu-central-1.amazonaws.com/test/chat-app:latest"
 
           port_mappings = [
             {
@@ -96,9 +96,9 @@ module "ecs" {
         }
       }
 
-      subnet_ids = data.aws_subnets.default.ids
+      subnet_ids      = data.aws_subnets.default.ids
       security_groups = [aws_security_group.ecs.id]
-      
+
       security_group_rules = {
         egress_all = {
           type        = "egress"
@@ -130,23 +130,23 @@ module "db" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 6.0"
 
-  identifier = "chat-app-mysql"
-  engine     = "mysql"
-  engine_version = "8.0"
+  identifier           = "chat-app-mysql"
+  engine               = "mysql"
+  engine_version       = "8.0"
   family               = "mysql8.0"
   major_engine_version = "8.0"
 
-  instance_class         = "db.t3.micro"
-  allocated_storage      = 20
-  storage_encrypted      = false
-  skip_final_snapshot    = true
-  deletion_protection    = false
+  instance_class = "db.t4g.micro"
+  allocated_storage = 10
+  storage_encrypted   = false
+  skip_final_snapshot = true
+  deletion_protection = false
 
   manage_master_user_password = false
-  db_name  =  var.DB_NAME
-  username = var.DB_USERNAME
-  port     = "3306"
-  password    = var.DB_PASSWORD
+  db_name                     = var.DB_NAME
+  username                    = var.DB_USERNAME
+  port                        = "3306"
+  password                    = var.DB_PASSWORD
 
 
   create_db_subnet_group = true
@@ -173,7 +173,7 @@ resource "aws_security_group" "mysql" {
     to_port         = 3306
     protocol        = "tcp"
     security_groups = [aws_security_group.ecs.id]
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks     = ["0.0.0.0/0"]
     description     = "ECS access"
   }
 
@@ -213,9 +213,9 @@ resource "aws_ecr_lifecycle_policy" "chat_app_policy" {
         rulePriority = 1
         description  = "Keep only latest 2 images"
         selection = {
-          tagStatus     = "any"
-          countType     = "imageCountMoreThan"
-          countNumber   = 2
+          tagStatus   = "any"
+          countType   = "imageCountMoreThan"
+          countNumber = 2
         }
         action = {
           type = "expire"
