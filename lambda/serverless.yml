@@ -7,7 +7,6 @@ provider:
   region: eu-central-1
   memorySize: 128
   timeout: 30
-  logRetentionInDays: 1
   tracing:
     lambda: true 
   deploymentBucket:
@@ -30,6 +29,7 @@ provider:
 functions:
   processChatMessage:
     handler: src/main.handler
+    logRetentionInDays: 1
     environment:
       CLEAN_CHAT_MESSAGE_QUEUE_URL:
         Ref: CleanChatMessageQueue
