@@ -36,6 +36,7 @@
   <h2>Chat Room</h2>
 
   <div>
+    <label>IP Address: <input type="text" id="ipaddress" /></label><br />
     <label>Username: <input type="text" id="username" /></label><br />
     <label>Room: <input type="text" id="room" /></label><br />
     <button id="joinBtn">Join Room</button>
@@ -50,13 +51,11 @@
 
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   <script>
-    const ip_address = 'chat-app.test.local:3000'
-    const socket = io(`ws://${ip_address}`, {
-      transports: ['websocket'],
-    });
-
+    let ip_address = '0.0.0.0:3000'
+    let socket;
     const joinBtn = document.getElementById('joinBtn');
     const usernameInput = document.getElementById('username');
+    const ipaddressInput = document.getElementById('ipaddress');
     const roomInput = document.getElementById('room');
     const chatDiv = document.getElementById('chat');
     const messageForm = document.getElementById('messageForm');
@@ -65,12 +64,15 @@
 
     joinBtn.addEventListener('click', () => {
     const username = usernameInput.value.trim();
+    ip_address = ipaddressInput.value.trim();
     const room = roomInput.value.trim();
-      if (!username || !room) {
-        alert('Username and room are required');
+      if (!username || !room || !ip_address) {
+        alert('Username, room and ip address are required');
         return;
       }
-
+      socket = io(`ws://${ip_address}`, {
+        transports: ['websocket'],
+      });
       if (socket.connected) {
         socket.emit('joinRoom', { username, room });
       } else {
@@ -79,7 +81,7 @@
         });
       }
     });
-
+     
     socket.on('joinedRoom', async (data) => {
       chatDiv.hidden = false;
       chatDiv.innerHTML = ''
