@@ -177,7 +177,7 @@ resource "aws_security_group" "mysql" {
 }
 
 resource "aws_ecr_repository" "chat_app" {
-  name = "test/chat-api"
+  name = "test/chat-app"
 
   image_tag_mutability = "MUTABLE"
 
