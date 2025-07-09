@@ -70,14 +70,13 @@ jobs:
         cd lambda
         npm ci
         npm run deploy
-  
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
-
 
     - name: Log in to Amazon ECR
       id: login-ecr
@@ -98,6 +97,11 @@ jobs:
         npm i
         npm run build
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver: docker-container
+
     - name: Build and push Docker image to ECR
       uses: docker/build-push-action@v5
       with:
@@ -115,4 +119,3 @@ jobs:
           --cluster ${{ env.ECS_CLUSTER }} \
           --service ${{ env.ECS_SERVICE }} \
           --force-new-deployment
-              
