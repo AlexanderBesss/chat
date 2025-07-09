@@ -15,54 +15,6 @@ resource "aws_service_discovery_private_dns_namespace" "this" {
   vpc         = data.aws_vpc.default.id
 }
 
-module "alb" {
-  source  = "terraform-aws-modules/alb/aws"
-  version = "~> 9.0"
-
-  enable_deletion_protection = false
-  name               = "chat-app-alb-3000"
-  load_balancer_type = "application"
-  internal           = false
-  vpc_id             = data.aws_vpc.default.id
-  subnets            = data.aws_subnets.default.ids
-
-  security_group_ingress_rules = {
-    http = {
-      from_port   = 3000
-      to_port     = 3000
-      ip_protocol = "tcp"
-      cidr_ipv4   = "0.0.0.0/0"
-    }
-  }
-
-  target_groups = {
-    chat-app = {
-      backend_protocol = "HTTP"
-      backend_port     = 3000
-      target_type      = "ip"
-      create_attachment = false
-      health_check = {
-        path    = "/health"
-        matcher = "200-399"
-      }
-    }
-  }
-
-  listeners = {
-    http = {
-      port     = 3000
-      protocol = "HTTP"
-      forward = {
-        target_group_key = "chat-app"
-      }
-    }
-  }
-
-  tags = {
-    Project = "Chat App"
-  }
-}
-
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "ecsTaskExecutionRole"
 
@@ -89,10 +41,18 @@ resource "aws_security_group" "ecs" {
   vpc_id      = data.aws_vpc.default.id
 
   egress {
-    from_port   = 0
-    to_port     = 0
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow public access to ECS chat-app on port 3000"
   }
 
   tags = {
@@ -131,41 +91,10 @@ module "ecs" {
           ]
         }
       }
-      
-      service_connect_configuration = {
-        enable_execute_command = true
-        assign_public_ip       = true
-        namespace              = aws_service_discovery_private_dns_namespace.this.name
-        service = {
-          client_alias = {
-            port     = 3000
-            dns_name = "chat-app"
-          }
-          port_name      = "chat-app"
-          discovery_name = "chat-app"
-        }
-      }
-
-      load_balancer = {
-        service = {
-          target_group_arn = module.alb.target_groups.chat-app.arn
-          container_name   = "chat-app"
-          container_port   = 3000
-        }
-      }
 
       subnet_ids = data.aws_subnets.default.ids
 
       security_group_rules = {
-        alb_ingress_3000 = {
-          type                     = "ingress"
-          from_port                = 3000
-          to_port                  = 3000
-          protocol                 = "tcp"
-          description              = "Allow ALB to reach ECS service"
-          source_security_group_id = module.alb.security_group_id
-        }
-
         egress_all = {
           type        = "egress"
           from_port   = 0
