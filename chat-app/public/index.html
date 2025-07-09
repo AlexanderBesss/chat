@@ -70,6 +70,9 @@
         alert('Username, room and ip address are required');
         return;
       }
+      if (socket) {
+        socket.disconnect();
+      }
       socket = io(`ws://${ip_address}`, {
         transports: ['websocket'],
       });
@@ -80,26 +83,25 @@
           socket.emit('joinRoom', { username, room });
         });
       }
-    });
-     
-    socket.on('joinedRoom', async (data) => {
-      chatDiv.hidden = false;
-      chatDiv.innerHTML = ''
-      messageForm.hidden = false;
-      const response = await fetch(`http://${ip_address}/messages/${data.room}`);
-      const messages = await response.json();
-       messages.data.forEach(message => {
-        appendChatMessage(message.userId, message.content, message?.createdAt);
+      socket.on('joinedRoom', async (data) => {
+        chatDiv.hidden = false;
+        chatDiv.innerHTML = ''
+        messageForm.hidden = false;
+        const response = await fetch(`http://${ip_address}/messages/${data.room}`);
+        const messages = await response.json();
+        messages.data.forEach(message => {
+          appendChatMessage(message.userId, message.content, message?.createdAt);
+        });
+        appendSystemMessage(data.message);
       });
-      appendSystemMessage(data.message);
-    });
 
-    socket.on('userJoined', (data) => {
-      appendSystemMessage(data.message);
-    });
+      socket.on('userJoined', (data) => {
+        appendSystemMessage(data.message);
+      });
 
-    socket.on('messageFromRoom', (data) => {
-      appendChatMessage(data.username, data.content);
+      socket.on('messageFromRoom', (data) => {
+        appendChatMessage(data.username, data.content);
+      });
     });
 
     sendBtn.addEventListener('click', () => {
