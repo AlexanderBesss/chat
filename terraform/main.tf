@@ -85,7 +85,6 @@ module "ecs" {
             {
               name          = "chat-app"
               containerPort = 3000
-              hostPort      = 3000
               protocol      = "tcp"
             }
           ]
@@ -93,7 +92,8 @@ module "ecs" {
       }
 
       subnet_ids = data.aws_subnets.default.ids
-
+      security_groups = [aws_security_group.ecs.id]
+      
       security_group_rules = {
         egress_all = {
           type        = "egress"
