@@ -11,7 +11,7 @@ services:
     ports:
       - "3306:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_password"]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -23,8 +23,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SQS_PROVIDER=elasticmq
-      - SERVICES=sqs,lambda,cloudformation,logs,iam,cloudwatch
+      - SERVICES=sqs,lambda,iam,ecs,ec2,rds,ecr,servicediscovery,logs,cloudformation,cloudwatch
       - DEBUG=0
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
